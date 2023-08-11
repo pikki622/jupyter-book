@@ -101,24 +101,20 @@ def update_latex_documents(latex_documents, latexoverrides):
 
 def latex_document_components(latex_documents):
     """Return a dictionary of latex_document components by name"""
-    latex_tuple_components = {}
-    for idx, item in enumerate(LATEX_DOCUMENTS):
-        # skip if latex_documents doesn't doesn't contain all elements
-        # of the LATEX_DOCUMENT specification tuple
-        if idx >= len(latex_documents):
-            continue
-        latex_tuple_components[item] = latex_documents[idx]
-    return latex_tuple_components
+    return {
+        item: latex_documents[idx]
+        for idx, item in enumerate(LATEX_DOCUMENTS)
+        if idx < len(latex_documents)
+    }
 
 
 def latex_document_tuple(components):
     """Return a tuple for latex_documents from named components dictionary"""
-    latex_doc = []
-    for item in LATEX_DOCUMENTS:
-        if item not in components.keys():
-            continue
-        else:
-            latex_doc.append(components[item])
+    latex_doc = [
+        components[item]
+        for item in LATEX_DOCUMENTS
+        if item in components.keys()
+    ]
     return tuple(latex_doc)
 
 
@@ -165,7 +161,7 @@ def autobuild_singlepage_latexdocs(app):
                 # assuming we need to remove only the first instance
                 parts.remove(sourcedir)
             docname = "-".join(parts)
-            targetdoc = docname + ".tex"
+            targetdoc = f"{docname}.tex"
 
         latex_doc["targetname"] = targetdoc
         latex_doc["title"] = title.astext()
