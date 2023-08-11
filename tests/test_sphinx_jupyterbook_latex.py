@@ -34,5 +34,5 @@ def test_toc(cli, build_resources, file_regression):
     # to remove source attribute of document as it is a temp
     index = pseudoxml.index("\n")
     substr = pseudoxml[index:]
-    pseudoxml = "<document>" + substr
+    pseudoxml = f"<document>{substr}"
     file_regression.check(str(pseudoxml), extension=".xml", encoding="utf8")

@@ -14,10 +14,12 @@ def get_entry_point_names(group: str) -> List[str]:
 
 
 def load_entry_point(group: str, name: str) -> Any:
-    eps = [ep for ep in metadata.entry_points().get(group, []) if ep.name == name]
-    if not eps:
+    if eps := [
+        ep for ep in metadata.entry_points().get(group, []) if ep.name == name
+    ]:
+        return eps[0].load()
+    else:
         raise KeyError(f"Entry-point {group}:{name}")
-    return eps[0].load()
 
 
 class PluggableGroup(click.Group):

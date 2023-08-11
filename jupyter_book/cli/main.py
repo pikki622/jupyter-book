@@ -200,7 +200,7 @@ def build(
             subdir = str(PATH_SRC_FOLDER.relative_to(BUILD_PATH))
         if subdir and subdir != ".":
             subdir = subdir.replace("/", "-")
-            subdir = subdir + "-" + PAGE_NAME
+            subdir = f"{subdir}-{PAGE_NAME}"
             BUILD_PATH = Path(BUILD_PATH).joinpath("_build", "_page", subdir)
         else:
             BUILD_PATH = Path(BUILD_PATH).joinpath("_build", "_page", PAGE_NAME)
@@ -220,7 +220,6 @@ def build(
             # --individualpages option set to True for page call
             "latex_individualpages": True,
         }
-    # Build Project
     else:
         build_type = "book"
         PAGE_NAME = None
@@ -468,8 +467,9 @@ def sphinx(ctx, path_source, config, toc):
         "# re-generate this one.",
         "###############################################################################",
     ]
-    for key in sorted(sphinx_config):
-        lines.append(f"{key} = {sphinx_config[key]!r}")
+    lines.extend(
+        f"{key} = {sphinx_config[key]!r}" for key in sorted(sphinx_config)
+    )
     content = "\n".join(lines).rstrip() + "\n"
 
     out_folder = Path(path_config).parent if path_config else Path(full_path_source)
@@ -485,11 +485,7 @@ def find_config_path(path: Path) -> Tuple[Path, bool]:
     if found then returns the path which has _config.yml,
     else returns the present dir as the path.
     """
-    if path.is_dir():
-        current_dir = path
-    else:
-        current_dir = path.parent
-
+    current_dir = path if path.is_dir() else path.parent
     if (current_dir / "_config.yml").is_file():
         return (current_dir, True)
 
@@ -498,9 +494,7 @@ def find_config_path(path: Path) -> Tuple[Path, bool]:
             return (current_dir, True)
         current_dir = current_dir.parent
 
-    if not path.is_dir():
-        return (path.parent, False)
-    return (path, False)
+    return (path.parent, False) if not path.is_dir() else (path, False)
 
 
 def builder_specific_actions(
@@ -574,8 +568,8 @@ def builder_specific_actions(
             path_pdf_output = path_pdf_output.joinpath("book.pdf")
             html_to_pdf(output_path.joinpath("index.html"), path_pdf_output)
         elif cmd_type == "page":
-            path_pdf_output = path_pdf_output.joinpath(page_name + ".pdf")
-            html_to_pdf(output_path.joinpath(page_name + ".html"), path_pdf_output)
+            path_pdf_output = path_pdf_output.joinpath(f"{page_name}.pdf")
+            html_to_pdf(output_path.joinpath(f"{page_name}.html"), path_pdf_output)
         path_pdf_output_rel = Path(op.relpath(path_pdf_output, Path()))
         _message_box(
             f"""\
@@ -604,5 +598,5 @@ def builder_specific_actions(
             """
             )
         except OSError:
-            _error("Error: Failed to run: %s" % makecmd)
+            _error(f"Error: Failed to run: {makecmd}")
             return 1
